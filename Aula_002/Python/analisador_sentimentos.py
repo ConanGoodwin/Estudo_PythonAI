@@ -5,20 +5,20 @@ import time
 from google.api_core.exceptions import InvalidArgument
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-prompt = """Você é um professor de programação e de desenvolvimeto
-de software, fale como um professor."""
+prompt = """Você é um chatbot que analisa o sentimento de textos
+fornecidos pelo usuário,incluindo arquivos de texto anexados"""
+
 model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=prompt)
 
 chat = model.start_chat()
 chat.send_message(
     "Olá, tudo bem?"
-    """estou condando um aplicação que sobe a analisa arquivos de imagens
-      e arquivos .csv"""
+    "estou analisando sentimentos ligados a textos(incluindo anexados)."
 )
 
 
-def upload_file(message):
-    responseFiles = []
+def upload_files(message):
+    file_paths = []
 
     if message["files"]:
         for file in message["files"]:
@@ -26,28 +26,28 @@ def upload_file(message):
             while uploaded_file.state.name == "PROCESSING":
                 time.sleep(3)
                 uploaded_file = genai.upload_file(uploaded_file.name)
-            responseFiles.append(uploaded_file)
+            file_paths.append(uploaded_file)
 
-    return responseFiles
+    return file_paths
 
 
-def gradio_chat(message, _history):
-    responseFiles = upload_file(message)
-    promptExtends = [message["text"]]
+def chat_gradio(message, _history):
+    messageFiles = upload_files(message)
+    respExtended = [message["text"]]
 
-    promptExtends.extend(responseFiles)
+    respExtended.extend(messageFiles)
     try:
-        response = chat.send_message(promptExtends).text
+        resp = chat.send_message(respExtended).text
     except InvalidArgument as e:
-        response = chat.send_message(
+        resp = chat.send_message(
             f"O usuário te enviou um arquivo para você ler e obteve erro: {e}."
             "Pode explicar o que houve e dizer quais tipos de arquivos você "
             "dá suporte? Assuma que a pessoa não sabe programação e "
             "não quer o erro original. Explique de forma simples e concisa."
         ).text
 
-    return response
+    return resp
 
 
-chat_interface = gr.ChatInterface(fn=gradio_chat, multimodal=True)
+chat_interface = gr.ChatInterface(fn=chat_gradio, multimodal=True)
 chat_interface.launch()
