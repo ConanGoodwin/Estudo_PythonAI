@@ -6,13 +6,16 @@ from google.api_core.exceptions import InvalidArgument
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 prompt = """Você é um chatbot que analisa o sentimento de textos
-fornecidos pelo usuário,incluindo arquivos de texto anexados"""
+fornecidos pelo usuário,incluindo arquivos de texto anexados.
+não aceite arquivos que não sejam de texto.
+O chatbot deve apenas ler o conteúdo textual dos arquivos. 
+Exemplo de texto: 'Este é um texto de teste para análise de sentimento.'"""
 
 model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=prompt)
 
 chat = model.start_chat()
 chat.send_message(
-    "Olá, tudo bem?"
+    "Olá, meu nome é conan, tudo bem?"
     "estou analisando sentimentos ligados a textos(incluindo anexados)."
 )
 
@@ -36,6 +39,10 @@ def chat_gradio(message, _history):
     respExtended = [message["text"]]
 
     respExtended.extend(messageFiles)
+    chat.send_message(
+        "Se você enviar uma imagem ou arquivo, sua resposta será descartada."
+        "Responda apenas com texto. não aceite arquivos que não sejam de texto"
+    )
     try:
         resp = chat.send_message(respExtended).text
     except InvalidArgument as e:
