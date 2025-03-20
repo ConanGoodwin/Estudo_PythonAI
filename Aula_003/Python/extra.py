@@ -27,7 +27,7 @@ chat = model.start_chat(enable_automatic_function_calling=True)
 
 def assemble_prompt(message):
     prompt = [message["text"]]
-    # uploaded_files = upload_file(message)
+    uploaded_files = upload_file(message)
     # prompt.extend(uploaded_files)
 
     return prompt
@@ -44,7 +44,7 @@ def upload_file(message):
                 uploaded_file = genai.upload_file(uploaded_file.name)
             responseFiles.append(uploaded_file)
 
-        return responseFiles
+    return responseFiles
 
 
 def gradio_chat(message, _history):
