@@ -28,7 +28,7 @@ chat = model.start_chat(enable_automatic_function_calling=True)
 def assemble_prompt(message):
     prompt = [message["text"]]
     uploaded_files = upload_file(message)
-    # prompt.extend(uploaded_files)
+    prompt.extend(uploaded_files)
 
     return prompt
 
